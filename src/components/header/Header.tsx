@@ -12,7 +12,7 @@ const Header: FC = () => {
           Login
         </button>
         <button className="px-4 py-2 mr-2 text-white bg-transparent rounded-md hover:bg-gray-100 hover:text-gray-900 text-lg">
-          SignUp
+          SignUpw
         </button>
         <button className="px-4 py-2 mr-2 text-white bg-transparent rounded-md hover:bg-gray-100 hover:text-gray-900 text-lg ">
           Stats
