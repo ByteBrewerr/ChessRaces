@@ -1,79 +1,64 @@
 import React, { FC, useEffect, useState } from 'react';
 import BoardCell from './BoardCell';
 
-const Board: FC = () => {
-  const boardSize = 8;
-  const [board, setBoard] = useState<JSX.Element[][]>([]);
-  const [possibleMoves, setPossibleMoves] = useState<{ row: number, col: number }[]>([]);
+type PiecePosition = {
+  row: number;
+  col: number;
+};
 
-  useEffect(() => {
-    const newBoard = Array.from({ length: boardSize }, (_, row) =>
-      Array.from({ length: boardSize }, (_, col) => {
-        const color = (row + col) % 2 === 0 ? 'bg-white' : 'bg-green-600';
-        const key = `${row}-${col}`;
-        const playerPiece = row === 7 && col === 4;
-        return <BoardCell key={key} backgroundColor={color} playerPiece={playerPiece} row={row} col={col} onClick={onCellClick} />;
-      })
-    );
-    setBoard(prevBoard => newBoard);;
-  }, []);
-  
-  const getPossibleMoves = (row: number, col: number)=>{
-    const moves:{ row: number, col: number }[] = [];
-    
-    if (row > 0) {
-      moves.push({ row: row - 1, col: col });
-    }
-    if (col > 0) {
-      moves.push({ row: row, col: col - 1 });
-    }
-    if (col < boardSize - 1) {
-      moves.push({ row: row, col: col + 1 });
-    }
-    return moves
-  }
-  const onCellClick = (row: number, col: number, playerPiece: boolean):void => {
-    console.log(board)
-    const possibleMoves = getPossibleMoves(row, col)
-    if (playerPiece) {
-      const newBoard = Array.from({ length: boardSize }, (_, rowIndex)  =>
-        Array.from({ length: boardSize }, (_, colIndex)  => {
-          
+const Board: React.FC = () => {
+  const [piecePosition, setPiecePosition] = useState<PiecePosition>({ row: 7, col: 4 });
+  const [selectedPiecePosition, setSelectedPiecePosition] = useState<PiecePosition | null>(null);
 
-          let color = (rowIndex + colIndex) % 2 === 0 ? 'bg-white' : 'bg-green-600';
-          playerPiece = (row === rowIndex && col === colIndex)
-          const isPossibleMove = possibleMoves.some(move => move.row === rowIndex && move.col === colIndex);
-          if (isPossibleMove) {
-            color = 'bg-yellow-500';
-          }
-
-          
-
-          return <BoardCell 
-            key={`${rowIndex}-${colIndex}`} 
-            backgroundColor={color} 
-            playerPiece={playerPiece} 
-            row={rowIndex} 
-            col={colIndex} 
-            onClick={onCellClick} 
-          />
-        })
-      );
-  
-      setBoard(prevBoard => newBoard);;
+  const handleCellClick = (row: number, col: number) => {
+    if (piecePosition && piecePosition.row === row && piecePosition.col === col) {
+      setSelectedPiecePosition({ row, col });
+    } else if (selectedPiecePosition) {
+      if (selectedPiecePosition.row === row && selectedPiecePosition.col === col) {
+        setSelectedPiecePosition(null);
+      } else if (calculatePossibleMoves(selectedPiecePosition).includes(`${row}${col}`)) {
+        setPiecePosition({ row, col });
+        setSelectedPiecePosition(null);
+      }
     }
-    
   };
 
- 
+  const calculatePossibleMoves = (position: PiecePosition) => {
+    const moves: string[] = [];
+    const { row, col } = position;
+
+    if (row > 0) {
+      moves.push(`${row - 1}${col}`);
+    }
+    if (col > 0) {
+      moves.push(`${row}${col - 1}`);
+    }
+    if (col < 7) {
+      moves.push(`${row}${col + 1}`);
+    }
+
+    return moves;
+  };
 
   return (
-    <div className='h-[90vh] flex justify-center items-center'>
-      <div className='flex w-[600px] h-[600px] flex-wrap '>
-        {board}
+    <div className="flex flex-col items-center justify-center">
+      <div className="grid grid-cols-8 gap-1">
+        {[...Array(8)].map((_, row) => (
+          [...Array(8)].map((_, col) => (
+            <BoardCell
+              key={`${row}${col}`}
+              row={row}
+              col={col}
+              piecePosition={piecePosition}
+              selectedPiecePosition={selectedPiecePosition}
+              onCellClick={handleCellClick}
+            />
+          ))
+        ))}
       </div>
+      <div className="text-center mt-4">{piecePosition && piecePosition.row === 7 && piecePosition.col === 4 && 'playerPiece'}</div>
     </div>
   );
-}
+};
 
 export default Board;
