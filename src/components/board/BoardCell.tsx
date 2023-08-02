@@ -1,47 +1,38 @@
 import React, { FC } from 'react';
-import PlayerPiece from '../playerPiece/PlayerPiece';
+import PlayerPiece from '../game/PlayerPiece';
+import EnemyPlayerPiece from '../game/EnemyPlayerPiece'
+import PossibleMoveImage from '../game/PosibleMoveImage';
 
-type PiecePosition = {
+interface PiecePosition  {
   row: number;
   col: number;
 };
-
-const BoardCell: React.FC<{
+interface Props {
   row: number;
   col: number;
+  color: string;
+  isPossibleToMove: boolean
   piecePosition: PiecePosition | null;
-  selectedPiecePosition: PiecePosition | null;
+  enemyPiecePosition: PiecePosition | null
+  selectedPiecePosition?: PiecePosition | null;
   onCellClick: (row: number, col: number) => void;
-}> = ({ row, col, piecePosition, selectedPiecePosition, onCellClick }) => {
-  const calculatePossibleMoves = (position: PiecePosition) => {
-    const moves: string[] = [];
-    const { row, col } = position;
+}
 
-    if (row > 0) {
-      moves.push(`${row - 1}${col}`);
-    }
-    if (col > 0) {
-      moves.push(`${row}${col - 1}`);
-    }
-    if (col < 7) {
-      moves.push(`${row}${col + 1}`);
-    }
-
-    return moves;
-  };
-  const isPieceSelected = selectedPiecePosition && selectedPiecePosition.row === row && selectedPiecePosition.col === col;
-  const possibleMoves = isPieceSelected ? calculatePossibleMoves(selectedPiecePosition) : [];
-
-  const handleCellClick = () => {
-    onCellClick(row, col);
-  };
-  
+const BoardCell: FC<Props> = ({ row, col, color, piecePosition, enemyPiecePosition, onCellClick, isPossibleToMove }) => {
+  const onHover = ():string => {
+    if (color==='bg-yellow-500') return 'hover:bg-yellow-600'
+    if (color==='bg-white') return 'hover:bg-gray-300'
+    if (color==='bg-green-500') return 'hover:bg-green-600'
+    else return ''
+  }
   return (
     <div
-      className={`w-12 h-12 flex items-center justify-center ${isPieceSelected ? 'bg-red-500' : (possibleMoves.includes(`${row}${col}`) ? 'bg-green-500' : 'bg-gray-500')}`}
-      onClick={handleCellClick}
+      className={`w-[75px] h-[75px] flex items-center justify-center ${color} ${onHover()}`}
+      onClick={()=>onCellClick(row, col)}
     >
-      {piecePosition && piecePosition.row === row && piecePosition.col === col && 'playerPiece'}
+      {piecePosition && piecePosition.row === row && piecePosition.col === col && <PlayerPiece/>}
+      {enemyPiecePosition && enemyPiecePosition.row === row && enemyPiecePosition.col === col && <EnemyPlayerPiece/>}
+      {isPossibleToMove && <PossibleMoveImage/>}
     </div>
   );
 };
