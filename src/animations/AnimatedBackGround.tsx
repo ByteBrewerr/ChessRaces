@@ -26,12 +26,12 @@ const AnimatedBackGround = () => {
                 interactivity: {
                     events: {
                         onClick: {
-                            enable: true,
+                            enable: false,
                             mode: "push",
                         },
                         onHover: {
                             enable: true,
-                            mode: "repulse",
+                            mode: ["grab"],
                         },
                         resize: true,
                     },
@@ -52,7 +52,7 @@ const AnimatedBackGround = () => {
                     links: {
                         color: "#ffffff",
                         distance: 150,
-                        enable: true,
+                        enable: false,
                         opacity: 0.5,
                         width: 1,
                     },
@@ -63,7 +63,7 @@ const AnimatedBackGround = () => {
                             default: "bounce",
                         },
                         random: false,
-                        speed: 6,
+                        speed: 1,
                         straight: false,
                     },
                     number: {
@@ -85,7 +85,8 @@ const AnimatedBackGround = () => {
                 },
                 detectRetina: true,
             }}
-        />
-    );
+            
+         />
+   );
 };
 export default AnimatedBackGround

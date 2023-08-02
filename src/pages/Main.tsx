@@ -1,12 +1,12 @@
 import React, { FC } from 'react'
-import Header from '../components/header/Header'
+import ToPlayContainer from '../components/toPlayContainer/ToPlayContainer'
 
 
 
 const Main: FC = () => {
   return (
     <>
-      <Header/>
+      <ToPlayContainer/>
     </>
   )
 }
