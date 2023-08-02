@@ -19,15 +19,11 @@ interface Props {
 }
 
 const BoardCell: FC<Props> = ({ row, col, color, piecePosition, enemyPiecePosition, onCellClick, isPossibleToMove }) => {
-  const onHover = ():string => {
-    if (color==='bg-yellow-500') return 'hover:bg-yellow-600'
-    if (color==='bg-white') return 'hover:bg-gray-300'
-    if (color==='bg-green-500') return 'hover:bg-green-600'
-    else return ''
-  }
+  const onHover = color === 'bg-white' ? 'hover:bg-gray-300' : 'hover:bg-green-600'
+    
   return (
     <div
-      className={`w-[75px] h-[75px] flex items-center justify-center ${color} ${onHover()}`}
+      className={`w-[75px] h-[75px] flex items-center justify-center cursor-pointer ${color} ${onHover}`}
       onClick={()=>onCellClick(row, col)}
     >
       {piecePosition && piecePosition.row === row && piecePosition.col === col && <PlayerPiece/>}
