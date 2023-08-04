@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import possibleMove from '../../assets/possibleMove.png';
+import possibleMove from '../../../assets/possibleMove.png';
 
 const PossibleMoveImage: FC = () => {
   const containerStyle = {

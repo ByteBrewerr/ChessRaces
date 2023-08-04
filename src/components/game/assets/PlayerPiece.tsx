@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import piece from '../../assets/playerPiece.png';
+import piece from '../../../assets/playerPiece.png';
 
 const PlayerPiece: FC = () => {
   const containerStyle = {

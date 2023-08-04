@@ -1,10 +1,11 @@
 import React, { FC, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { decrementMinute, decrementSecond, selectMinutes, selectSeconds, resetTimer, setSeconds } from '../../redux/slices/timer';
+import { decrementMinute, decrementSecond, selectMinutes, selectSeconds, resetTimer, setSeconds, selectIsTimerRunning } from '../../../redux/slices/timer';
 
 const Timer: FC = () => {
   const minutes = useSelector(selectMinutes);
   const seconds = useSelector(selectSeconds);
+  const isTimerRunning = useSelector(selectIsTimerRunning)
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -25,12 +26,14 @@ const Timer: FC = () => {
         dispatch(decrementSecond());
       }, 1000);
     };
-    startTimer();
+    if (isTimerRunning){
+      startTimer();
+    };
 
     return () => {
       clearInterval(interval);
     };
-  }, [seconds, minutes]);
+  }, [seconds, minutes, isTimerRunning]);
 
   return (
     <div className="bg-white p-2 rounded font-bold text-3xl inline-block">
