@@ -1,6 +1,6 @@
 import React, { FC, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { decrementMinute, decrementSecond, selectMinutes, selectSeconds, resetTimer, setSeconds, selectIsTimerRunning } from '../../../redux/slices/timer';
+import { decrementMinute, decrementSecond, selectMinutes, selectSeconds,  setSeconds, selectIsTimerRunning } from '../../../redux/slices/timer';
 
 const Timer: FC = () => {
   const minutes = useSelector(selectMinutes);

@@ -22,7 +22,7 @@ const GameEnd: FC<Props> = ({isPlayerWinner, handleNewGame}) => {
         {isPlayerWinner ? 'Вы победили!' : 'Компьютер победил'}
       </div>
       <div className='mt-auto'>
-        <button className='text-3xl bg-blue-400 p-4 rounded-lg hover:bg-blue-500' onClick={()=>handleNewGame()}>
+        <button className='btn text-2xl ' onClick={()=>handleNewGame()}>
             Начать заного
         </button>
       </div> 

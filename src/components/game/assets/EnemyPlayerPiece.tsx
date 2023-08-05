@@ -10,7 +10,7 @@ const PlayerPiece: FC = () => {
   };
 
   return (
-    <div className='w-[60px] h-[60px]' style={containerStyle}>
+    <div className='w-[50px] h-[50px]' style={containerStyle}>
     </div>
   );
 }
