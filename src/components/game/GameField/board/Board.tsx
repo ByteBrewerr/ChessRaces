@@ -1,99 +1,84 @@
 import React, { FC, useState, useEffect } from 'react';
 import BoardCell from './BoardCell';
-import GameEnd from '../gameEnd/GameEnd';
-import { useDispatch, } from 'react-redux';
+import GameEnd from '../GameEnd';
+import { useDispatch, useSelector } from 'react-redux';
 import { resetTimer, setIsTimerRunnig } from '../../../../redux/slices/timer';
 import aStarSearch from '../../../../utils/aStarSearch';
 import Position from '../../../../interfaces/Position';
+import Winners from '../../../../enums/Winner.enum';
+import getDefaultBoardColor from '../../../../utils/getDefaultBoardColors';
+import isMountain from '../../../../utils/isMauntain';
+import isBarrier from '../../../../utils/isBarrier';
+import { selectPiecePosition, selectSelectedPiecePosition, selectEnemyPiecePosition, selectBarrierPostions, 
+selectMountainPositions, selectPossibleMoves, restartTheGame, setWinner, setCurrentMove, setSelectedPiecePosition, selectCurrentMove, selectWinner, setPossibleMoves, setPiecePosition, setEnemyPiecePosition } from '../../../../redux/slices/board';
+import Turn from '../../../../enums/Turn.enum';
 
-
-
-interface Props {
-  mountains: Position[];
-}
-
-const Board: FC<Props> = ({mountains}) => {
+const Board: FC = () => {
   const boardSize = 12;
   const dispatch = useDispatch();
-  const [piecePosition, setPiecePosition] = useState<Position>({ row: 11, col: boardSize/2 });
-  const [selectedPiecePosition, setSelectedPiecePosition] = useState<Position | null>(null);
-  const [enemyPiecePosition, setEnemyPiecePosition] = useState<Position>({ row: 0, col: boardSize/2 - 1 });
-  const [possibleMoves, setPossibleMoves] = useState<Position[]>([]);
-  const [isPlayerWinner, setIsPlayerWinner] = useState<boolean | null>(null);
-  const [isPlyerMove, setIsPlayerMove] = useState<boolean>(true);
+  const piecePosition = useSelector(selectPiecePosition)
+  const selectedPiecePosition = useSelector(selectSelectedPiecePosition)
+  const enemyPiecePosition = useSelector(selectEnemyPiecePosition)
+  const barrierPostions = useSelector(selectBarrierPostions)
+  const mountainsPosition = useSelector(selectMountainPositions)
+  const possibleMoves = useSelector(selectPossibleMoves)
+  const winner = useSelector(selectWinner)
+  const currentMove = useSelector(selectCurrentMove)
   
 
   const handleNewGame = () => {
-    setPiecePosition({ row: boardSize-1, col: boardSize/2 });
-    setSelectedPiecePosition(null);
-    setEnemyPiecePosition({ row: 0, col: boardSize/2-1 });
-    setPossibleMoves([]);
-    setIsPlayerMove(true);
+    dispatch(restartTheGame());
     dispatch(resetTimer());
-    setIsPlayerWinner(null);
   };
   
   useEffect(() => { // COMPUTER MOVEMENTS
     const timer = setTimeout(() => {
-      if (!isPlyerMove && isPlayerWinner === null) {
-        setEnemyPiecePosition((position) => {
-          const move = aStarSearch(position, { row: 11, col: 1 }, calculatePossibleMoves)[1]
-          if (move.row === boardSize-1) setIsPlayerWinner(false)
-          return move;
-        });
-        dispatch(setIsTimerRunnig(true));
-        setIsPlayerMove(true);
+      if (currentMove === Turn.Computer && winner === Winners.Nobody) {
+        const move = aStarSearch(enemyPiecePosition, { row: 11, col: 1 }, calculatePossibleMoves)[1]
+        dispatch(setEnemyPiecePosition(move))
+        if (move.row === boardSize-1) {
+          dispatch(setWinner(Winners.Computer))
+        }
+        dispatch(setIsTimerRunnig(true))
+        dispatch(setCurrentMove(Turn.Player))
       }
     }, 300);
     return () => clearTimeout(timer);
   }, [piecePosition]);
 
   function handleCellClick(row: number, col: number) {
-    if (isPlayerWinner === null && isPlyerMove) {
+    if (winner === Winners.Nobody && currentMove === Turn.Player) {
       if (piecePosition.row === row && piecePosition.col === col && !selectedPiecePosition) {
-        setPossibleMoves(calculatePossibleMoves({ row, col }));
-        setSelectedPiecePosition({ row, col });
+        dispatch(setPossibleMoves(calculatePossibleMoves({ row, col })))
+        dispatch(setSelectedPiecePosition({ row, col }))
       } else if (selectedPiecePosition) {
         if (possibleMoves.some(position => position.row === row && position.col === col)) {
-          setPiecePosition({ row, col });
-          setIsPlayerMove(false);
-          setSelectedPiecePosition(null);
-          dispatch(setIsTimerRunnig(false));
+          dispatch(setPiecePosition({row, col}))
+          dispatch(setCurrentMove(Turn.Computer))
+          dispatch(setSelectedPiecePosition(null))
+          dispatch(setIsTimerRunnig(false))
           if (row === 0) {
-            setIsPlayerWinner(true);
+            dispatch(setWinner(Winners.Player))
           }
         } else {
-          setSelectedPiecePosition(null);
+          dispatch(setSelectedPiecePosition(null))
         }
-        setPossibleMoves([]);
+        dispatch(setPossibleMoves([]))
       }
     }
   }
 
-
   function calculatePossibleMoves({ row, col }: Position) {
-    function isCellEmpty (row: number, col: number): boolean {
-      if ((row === piecePosition.row && col === piecePosition.col) || 
-      (row === enemyPiecePosition.row && col === enemyPiecePosition.col) ||
-      (mountains.find(position => position.row === row && position.col === col))){
-        return false
-      }
-      else return true
-    }
-
     const moves: Position[] = [];
     if (row > 0 && isCellEmpty(row-1,col)) {
       moves.push({row: row - 1,col}); // move up
     }
-
     if (row < boardSize-1 && isCellEmpty(row+1, col)) {
       moves.push({row: row + 1,col}); // move down
     }
-
     if (col > 0 && isCellEmpty(row, col-1)) {
       moves.push({row,col:col - 1}); // move left
     }
-
     if (col < boardSize-1 && isCellEmpty(row, col+1)){
       moves.push({row,col:col + 1}); // move right
     }
@@ -109,18 +94,22 @@ const Board: FC<Props> = ({mountains}) => {
     if (col > 0  && row < boardSize-1 && isCellEmpty(row+1, col-1)){
       moves.push({row: row+1 ,col:col-1}); // move down-left
     }
-    console.log(moves)
     return moves;
+
+    function isCellEmpty (row: number, col: number): boolean {
+      if ((row === piecePosition.row && col === piecePosition.col) || 
+      (row === enemyPiecePosition.row && col === enemyPiecePosition.col) ||
+      (mountainsPosition.find(position => position.row === row && position.col === col))||
+      (barrierPostions.find(position => position.row === row && position.col === col))){
+        return false
+      }
+      else return true
+    }
   };
 
 
-  function getDefaultBoardColor(row: number, col: number): string {
-    if ((row % 2 !== 0 && col % 2 === 0) || (row % 2 === 0 && col % 2 !== 0)) {
-      return 'bg-green-500';
-    } else {
-      return 'bg-white';
-    }
-  }
+
+  
   return (
     <div className="flex flex-wrap w-[720px] h-[720px] justify-center items-center">
       {([...Array(boardSize)].map((_, row) => (
@@ -134,13 +123,14 @@ const Board: FC<Props> = ({mountains}) => {
                 isPossibleToMove={possibleMoves.some(position => position.row === row && position.col === col)}
                 piecePosition={piecePosition}
                 enemyPiecePosition={enemyPiecePosition}
-                mountainPositions={mountains}
+                isMountain={isMountain(row, col, mountainsPosition)}
+                isBarrier={isBarrier(row,col, barrierPostions)}
                 onCellClick={handleCellClick}
               />
             );
           })
         )))}
-      <GameEnd isPlayerWinner={isPlayerWinner} handleNewGame={handleNewGame} />
+      <GameEnd winner={winner} handleNewGame={handleNewGame} />
     </div>
   );
 };

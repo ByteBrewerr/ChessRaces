@@ -4,6 +4,8 @@ import EnemyPlayerPiece from '../../assets/EnemyPlayerPiece'
 import PossibleMoveImage from '../../assets/PosibleMoveImage';
 import Mountain from '../../assets/Mountain';
 import Position from '../../../../interfaces/Position';
+import Barrier from '../../assets/Barrier';
+
 
 interface Props {
   row: number
@@ -12,13 +14,13 @@ interface Props {
   isPossibleToMove: boolean
   piecePosition: Position
   enemyPiecePosition: Position
-  mountainPositions: Position[]
+  isMountain: boolean
+  isBarrier: boolean
   onCellClick: (row: number, col: number) => void
 }
 
-const BoardCell: FC<Props> = ({ row, col, color, piecePosition, enemyPiecePosition, onCellClick, isPossibleToMove, mountainPositions }) => {
+const BoardCell: FC<Props> = ({ row, col, color, piecePosition, enemyPiecePosition, onCellClick, isPossibleToMove, isMountain, isBarrier }) => {
   const onHover = color === 'bg-white' ? 'hover:bg-gray-300' : 'hover:bg-green-600'
-  const isMountain = mountainPositions.find(position => position.row === row && position.col === col)
   return (
     <div
       className={`w-[60px] h-[60px] flex items-center justify-center cursor-pointer ${color} ${onHover}`}
@@ -28,6 +30,7 @@ const BoardCell: FC<Props> = ({ row, col, color, piecePosition, enemyPiecePositi
       {enemyPiecePosition && enemyPiecePosition.row === row && enemyPiecePosition.col === col && <EnemyPlayerPiece/>}
       {isPossibleToMove && <PossibleMoveImage/>}
       {isMountain && <Mountain/>}
+      {isBarrier && <Barrier/>}
     </div>
   );
 };

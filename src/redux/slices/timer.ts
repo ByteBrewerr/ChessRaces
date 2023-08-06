@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from '../store'
 
-export interface timerState {
+interface timerState {
   minutes: number
   seconds: number
   isTimerRunning: boolean
@@ -18,16 +18,16 @@ export const timerSlice = createSlice({
   name: 'timer',
   initialState,
   reducers: {
-    decrementMinute: (state) => {
+    decrementMinute(state) {
       state.minutes-=1;
     },
-    decrementSecond: (state) => {
+    decrementSecond(state) {
       state.seconds-=1;
     },
     setSeconds(state, action: PayloadAction<number>) {
       state.seconds = action.payload + 1;
     },
-    resetTimer: (state) => {
+    resetTimer(state) {
       state.minutes = 10;
       state.seconds = 0;
       state.isTimerRunning = false
