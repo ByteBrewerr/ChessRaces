@@ -3,26 +3,21 @@ import PlayerPiece from '../../assets/PlayerPiece';
 import EnemyPlayerPiece from '../../assets/EnemyPlayerPiece'
 import PossibleMoveImage from '../../assets/PosibleMoveImage';
 import Mountain from '../../assets/Mountain';
+import Position from '../../../../interfaces/Position';
 
-interface Position  {
-  row: number;
-  col: number;
-};
 interface Props {
-  row: number;
-  col: number;
-  color: string;
+  row: number
+  col: number
+  color: string
   isPossibleToMove: boolean
-  piecePosition: Position | null;
-  enemyPiecePosition: Position | null
+  piecePosition: Position
+  enemyPiecePosition: Position
   mountainPositions: Position[]
-  isEmpty: boolean
-  onCellClick: (row: number, col: number) => void;
+  onCellClick: (row: number, col: number) => void
 }
 
 const BoardCell: FC<Props> = ({ row, col, color, piecePosition, enemyPiecePosition, onCellClick, isPossibleToMove, mountainPositions }) => {
   const onHover = color === 'bg-white' ? 'hover:bg-gray-300' : 'hover:bg-green-600'
-  const cellPosition = {row,col}
   const isMountain = mountainPositions.find(position => position.row === row && position.col === col)
   return (
     <div
