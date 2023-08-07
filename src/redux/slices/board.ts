@@ -13,6 +13,7 @@ interface boardState {
     selectedPiecePosition: Position | null
     enemyPiecePosition: Position
     barrierPostions: Position[]
+    isBarrierSelected: boolean
     mountainPositions: Position[]
     possibleMoves: Position[]
     currentMove: Turn
@@ -25,6 +26,7 @@ const initialState: boardState = {
     enemyPiecePosition: {row: 0, col: 5},
     selectedPiecePosition: null,
     barrierPostions: [],
+    isBarrierSelected: false,
     mountainPositions: generateMountains(),
     possibleMoves: [],
     currentMove: Turn.Player,
@@ -45,6 +47,7 @@ export const boardSlice = createSlice({
         state.possibleMoves=[]
         state.Winner= Winners.Nobody
         state.currentMove = Turn.Player
+        state.isBarrierSelected = false
     },
     setPiecePosition(state, action: PayloadAction<Position>){
         state.piecePosition = action.payload
@@ -63,11 +66,18 @@ export const boardSlice = createSlice({
     },
     setPossibleMoves(state, action: PayloadAction<Position[]>){
         state.possibleMoves = action.payload
+    },
+    setSelectedBarrier(state, action: PayloadAction<boolean>){
+        state.isBarrierSelected = action.payload
+    },
+    addNewBarrier(state, action: PayloadAction<Position>){
+        state.barrierPostions.push(action.payload)
     }
   },
 });
   
-export const { restartTheGame, setWinner, setCurrentMove, setSelectedPiecePosition, setPossibleMoves, setPiecePosition, setEnemyPiecePosition} = boardSlice.actions;
+export const { restartTheGame, setWinner, setCurrentMove, setSelectedPiecePosition,
+     setPossibleMoves, setPiecePosition, setEnemyPiecePosition, setSelectedBarrier, addNewBarrier} = boardSlice.actions;
 
 export const selectEnemyPiecePosition = (state:RootState) => state.board.enemyPiecePosition;
 export const selectPiecePosition = (state:RootState) => state.board.piecePosition;
@@ -78,6 +88,7 @@ export const selectMountainPositions = (state:RootState) => state.board.mountain
 export const selectPossibleMoves = (state:RootState) => state.board.possibleMoves;
 export const selectWinner = (state:RootState) => state.board.Winner;
 export const selectCurrentMove = (state:RootState) => state.board.currentMove;
+export const selectIsBarrierSelected = (state:RootState) => state.board.isBarrierSelected;
 
 export default boardSlice.reducer;
   

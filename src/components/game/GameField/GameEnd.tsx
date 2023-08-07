@@ -13,6 +13,7 @@ interface Props{
 const GameEnd: FC<Props> = ({winner, handleNewGame}) => {
   const seconds = useSelector(selectSeconds)
   const minutes = useSelector(selectMinutes)
+  
   if (seconds === 0 && minutes ===0){
     winner = Winners.Computer
   }

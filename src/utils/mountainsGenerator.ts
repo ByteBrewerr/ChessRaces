@@ -2,8 +2,8 @@ import React from "react";
 import Position from "../interfaces/Position";
 
 const generateMountains = () => {
-    const minMountains = 8;
-    const maxMountains = 14;
+    const minMountains = 14;
+    const maxMountains = 20;
 
     const numMountains = Math.floor(Math.random() * (maxMountains - minMountains + 1)) + minMountains;
     const mountains: Position[] = [];

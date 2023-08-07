@@ -10,8 +10,9 @@ import getDefaultBoardColor from '../../../../utils/getDefaultBoardColors';
 import isMountain from '../../../../utils/isMauntain';
 import isBarrier from '../../../../utils/isBarrier';
 import { selectPiecePosition, selectSelectedPiecePosition, selectEnemyPiecePosition, selectBarrierPostions, 
-selectMountainPositions, selectPossibleMoves, restartTheGame, setWinner, setCurrentMove, setSelectedPiecePosition, selectCurrentMove, selectWinner, setPossibleMoves, setPiecePosition, setEnemyPiecePosition } from '../../../../redux/slices/board';
+selectMountainPositions, selectPossibleMoves, restartTheGame, setWinner, setCurrentMove, setSelectedPiecePosition, selectCurrentMove, selectWinner, setPossibleMoves, setPiecePosition, setEnemyPiecePosition, selectIsBarrierSelected, addNewBarrier, setSelectedBarrier } from '../../../../redux/slices/board';
 import Turn from '../../../../enums/Turn.enum';
+import getRandomBestMoves from '../../../../utils/getRandomOfBestMoves';
 
 const Board: FC = () => {
   const boardSize = 12;
@@ -24,6 +25,7 @@ const Board: FC = () => {
   const possibleMoves = useSelector(selectPossibleMoves)
   const winner = useSelector(selectWinner)
   const currentMove = useSelector(selectCurrentMove)
+  const isBarrierSelected = useSelector(selectIsBarrierSelected)
   
 
   const handleNewGame = () => {
@@ -34,11 +36,11 @@ const Board: FC = () => {
   useEffect(() => { // COMPUTER MOVEMENTS
     const timer = setTimeout(() => {
       if (currentMove === Turn.Computer && winner === Winners.Nobody) {
-        const move = aStarSearch(enemyPiecePosition, { row: 11, col: 1 }, calculatePossibleMoves)[1]
-        dispatch(setEnemyPiecePosition(move))
-        if (move.row === boardSize-1) {
-          dispatch(setWinner(Winners.Computer))
-        }
+        const bestMove = getRandomBestMoves(enemyPiecePosition, boardSize, calculatePossibleMoves)    
+        dispatch(setEnemyPiecePosition(bestMove))
+        if (bestMove.row === boardSize-1) {
+          dispatch(setWinner(Winners.Computer)) 
+        } 
         dispatch(setIsTimerRunnig(true))
         dispatch(setCurrentMove(Turn.Player))
       }
@@ -47,25 +49,37 @@ const Board: FC = () => {
   }, [piecePosition]);
 
   function handleCellClick(row: number, col: number) {
-    if (winner === Winners.Nobody && currentMove === Turn.Player) {
-      if (piecePosition.row === row && piecePosition.col === col && !selectedPiecePosition) {
-        dispatch(setPossibleMoves(calculatePossibleMoves({ row, col })))
-        dispatch(setSelectedPiecePosition({ row, col }))
-      } else if (selectedPiecePosition) {
-        if (possibleMoves.some(position => position.row === row && position.col === col)) {
-          dispatch(setPiecePosition({row, col}))
-          dispatch(setCurrentMove(Turn.Computer))
-          dispatch(setSelectedPiecePosition(null))
-          dispatch(setIsTimerRunnig(false))
-          if (row === 0) {
-            dispatch(setWinner(Winners.Player))
-          }
-        } else {
-          dispatch(setSelectedPiecePosition(null))
-        }
-        dispatch(setPossibleMoves([]))
+    if(isBarrierSelected){
+      if (isCellEmpty(row, col)){
+        dispatch(addNewBarrier({row,col}))
+        dispatch(setSelectedBarrier(false))
       }
+      else{
+        dispatch(setSelectedBarrier(false))
+      }
+
+    }else{
+      if (winner === Winners.Nobody && currentMove === Turn.Player) {
+        if (piecePosition.row === row && piecePosition.col === col && !selectedPiecePosition) {
+          dispatch(setPossibleMoves(calculatePossibleMoves({ row, col })))
+          dispatch(setSelectedPiecePosition({ row, col }))
+        } else if (selectedPiecePosition) {
+          if (possibleMoves.some(position => position.row === row && position.col === col)) {
+            dispatch(setPiecePosition({row, col}))
+            dispatch(setCurrentMove(Turn.Computer))
+            dispatch(setSelectedPiecePosition(null))
+            dispatch(setIsTimerRunnig(false))
+            if (row === 0) {
+              dispatch(setWinner(Winners.Player))
+            }
+          } else {
+            dispatch(setSelectedPiecePosition(null))
+          }
+          dispatch(setPossibleMoves([]))
+        }
+      }    
     }
+    
   }
 
   function calculatePossibleMoves({ row, col }: Position) {
@@ -82,31 +96,31 @@ const Board: FC = () => {
     if (col < boardSize-1 && isCellEmpty(row, col+1)){
       moves.push({row,col:col + 1}); // move right
     }
-    if (col < boardSize-1 && row > 0 && isCellEmpty(row-1, col+1)){
-      moves.push({row:row-1,col:col + 1}); // move up-right
-    }
-    if (col > 0 && row > 0 && isCellEmpty(row-1, col-1)){
-      moves.push({row:row-1,col:col - 1}); // move up-left
-    }
-    if (col < boardSize-1 && row < boardSize-1 && isCellEmpty(row+1, col+1)){
-      moves.push({row: row+1,col:col + 1}); // move down-right
-    }
-    if (col > 0  && row < boardSize-1 && isCellEmpty(row+1, col-1)){
-      moves.push({row: row+1 ,col:col-1}); // move down-left
-    }
+    // if (col < boardSize-1 && row > 0 && isCellEmpty(row-1, col+1)){
+      //moves.push({row:row-1,col:col + 1}); // move up-right
+    //}
+    //if (col > 0 && row > 0 && isCellEmpty(row-1, col-1)){
+      //moves.push({row:row-1,col:col - 1}); // move up-left
+    //}
+    //if (col < boardSize-1 && row < boardSize-1 && isCellEmpty(row+1, col+1)){
+      //moves.push({row: row+1,col:col + 1}); // move down-right
+    //}
+    //if (col > 0  && row < boardSize-1 && isCellEmpty(row+1, col-1)){
+     // moves.push({row: row+1 ,col:col-1}); // move down-left
+    //}
     return moves;
 
-    function isCellEmpty (row: number, col: number): boolean {
-      if ((row === piecePosition.row && col === piecePosition.col) || 
-      (row === enemyPiecePosition.row && col === enemyPiecePosition.col) ||
-      (mountainsPosition.find(position => position.row === row && position.col === col))||
-      (barrierPostions.find(position => position.row === row && position.col === col))){
-        return false
-      }
-      else return true
-    }
+    
   };
-
+  function isCellEmpty (row: number, col: number): boolean {
+    if ((row === piecePosition.row && col === piecePosition.col) || 
+    (row === enemyPiecePosition.row && col === enemyPiecePosition.col) ||
+    (mountainsPosition.find(position => position.row === row && position.col === col))||
+    (barrierPostions.find(position => position.row === row && position.col === col))){
+      return false
+    }
+    else return true
+  }
 
 
   

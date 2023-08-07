@@ -87,5 +87,5 @@ export default function aStarSearch(start: Position, end: Position, calculatePos
       }
     }
   
-    return [];
+    return [start, start];
   }
